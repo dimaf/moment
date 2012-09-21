@@ -315,7 +315,7 @@
         for (i = 0; i < 12; i++) {
             m = moment([2000, i]);
             parse[i] = new RegExp('^' + (values.months[i] || values.months(m, '')) +
-                '|^' + (values.monthsShort[i] || values.monthsShort(m, '')).replace('.', ''), 'i');
+                '$|^' + (values.monthsShort[i] || values.monthsShort(m, '')).replace('.', '') + '$', 'i');
         }
         values.monthsParse = values.monthsParse || parse;
 
@@ -552,16 +552,25 @@
                 tzm : 0  // timezone minute offset
             },
             tokens = format.match(formattingTokens),
-            i, parsedInput;
+            i, parsedInput, start;
 
         for (i = 0; i < tokens.length; i++) {
             parsedInput = (getParseRegexForToken(tokens[i]).exec(string) || [])[0];
             if (parsedInput) {
-                string = string.slice(string.indexOf(parsedInput) + parsedInput.length);
+                start = string.indexOf(parsedInput);
+                string = string.substr(0, start) + string.substr(start + parsedInput.length);
                 addTimeToArrayFromToken(tokens[i], parsedInput, datePartArray, config);
             } else {
                 addTimeToArrayFromToken(tokens[i], null, datePartArray, config);
             }
+        }
+        //trim whitespace from what is left
+        string = string.replace(/^\s+|\s+$/g, "");
+        //this is to pass most unittests but will not notice things like 12-Sep:2001 for DD MMM YYYY
+        //string = string.replace(/\:|-|\+|T|\./g,"");
+        //check if we have something left
+        if (string.length > 0) {
+            datePartArray[8] = false;
         }
         // handle am pm
         if (config.isPm && datePartArray[3] < 12) {
