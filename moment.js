@@ -632,8 +632,9 @@
         for (i = 0; i < tokens.length; i++) {
             parsedInput = (getParseRegexForToken(tokens[i]).exec(string) || [])[0];
             if (parsedInput) {
-				start = string.indexOf(parsedInput);
-				string = string.substr(0, start) + string.substr(start + parsedInput.length);
+				//start = string.indexOf(parsedInput);
+				//string = string.substr(0, start) + string.substr(start + parsedInput.length);
+				string = string.slice(string.indexOf(parsedInput) + parsedInput.length);
 			}
 			if (formatTokenFunctions[tokens[i]]) {
 				// don't parse if its not a known token
